@@ -30,7 +30,11 @@ object SharedPreferencesUtils {
 
     private fun saveOpenWeatherApi() {
         sharedPreferences?.edit()
-            ?.putString(OPEN_WEATHER_API_KEY, "d1054a6ac667c22b3ec8865716423b7e")
+            ?.putString(OPEN_WEATHER_API_KEY, "8883d95e336012aa239a025ec94b5162")
             ?.apply()
+    }
+
+    fun getAppId(): String? {
+        return sharedPreferences?.getString(OPEN_WEATHER_API_KEY, null)
     }
 }

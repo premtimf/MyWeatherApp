@@ -2,7 +2,11 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id 'kotlin-kapt'
+    id 'com.google.dagger.hilt.android'
 }
+
+apply plugin: 'com.android.application'
 
 android {
     namespace 'com.example.myweatherapp'
@@ -36,6 +40,10 @@ android {
     }
 }
 
+kapt {
+    correctErrorTypes true
+}
+
 dependencies {
 
     implementation libs.androidx.core.ktx
@@ -55,4 +63,11 @@ dependencies {
     debugImplementation libs.androidx.ui.test.manifest
 
     implementation libs.androidx.security.crypto
+    implementation libs.play.services.location
+    implementation libs.hilt.android
+    kapt libs.hilt.compiler
+    implementation libs.kotlinx.coroutines.play.services
+    implementation libs.converter.gson
+    implementation libs.retrofit
+    implementation libs.retrofit2.kotlin.coroutines.adapter
 }
