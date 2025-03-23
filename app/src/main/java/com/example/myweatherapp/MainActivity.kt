@@ -28,9 +28,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.example.myweatherapp.ui.models.WeatherLocalState
 import com.example.myweatherapp.ui.models.WeatherState
 import com.example.myweatherapp.ui.theme.MyWeatherAppTheme
+import com.example.myweatherapp.utils.ImageLinkBuilder
 import com.example.myweatherapp.viewmodels.WeatherViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -96,6 +99,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalGlideComposeApi::class)
     @Composable
     private fun LocalData() {
         val weatherLocalState = weatherViewModel.weatherState.collectAsState()
@@ -105,15 +109,18 @@ class MainActivity : ComponentActivity() {
 
                 Text(city?.city?.name ?: "City name")
 
-                city?.weatherSlots?.let {
+                city?.weatherSlots?.let { weatherItems ->
                     LazyColumn {
-                        items(it) {
+                        items(weatherItems) { weatherItem ->
                             Row {
-                                Text(it.main ?: "Weather")
+                                Text(weatherItem.main ?: "Weather")
                                 Spacer(modifier = Modifier.size(5.dp))
-                                Text("${it.temperature} °Celcius")
+                                Text("${weatherItem.temperature} °Celcius")
                                 Spacer(modifier = Modifier.size(5.dp))
-                                Text(it.dateText)
+                                Text(weatherItem.dateText)
+                                weatherItem.icon?.let {
+                                    GlideImage(ImageLinkBuilder.Builder.setIcon(weatherItem.icon).build(), "Weather image")
+                                }
                             }
                         }
                     }
