@@ -3,8 +3,12 @@ package com.example.myweatherapp.usecases
 import android.util.Log
 import com.example.myweatherapp.repositories.LocationRepository
 import com.example.myweatherapp.repositories.WeatherRepository
+import com.example.myweatherapp.roomdb.entities.City
+import com.example.myweatherapp.roomdb.entities.CityWithWeatherSlots
+import com.example.myweatherapp.roomdb.entities.WeatherSlot
 import com.example.myweatherapp.ui.models.WeatherState
 import com.example.myweatherapp.utils.SharedPreferencesUtils
+import kotlinx.coroutines.flow.Flow
 import java.text.DecimalFormat
 import javax.inject.Inject
 
@@ -20,8 +24,25 @@ class GetWeatherUseCase @Inject constructor(
         val lon = df.format(location?.longitude).toDouble()
         val appId = SharedPreferencesUtils.getAppId()
 
-        return weatherRepository.getWeather(lat = lat, lon = lon, appId = appId)
+        val response = weatherRepository.getWeather(lat = lat, lon = lon, appId = appId)
+        if (response is WeatherState.Success) {
+            Log.d("Premtajm", "Success on get weather $response")
+            mapRestWeatherToSaveLocally(response)
+        }
+        return response
 
+    }
+
+    private suspend fun mapRestWeatherToSaveLocally(response: WeatherState.Success) {
+        response.weather?.let {
+            val city = City.mapFrom(it.city)
+            val weatherSlots = WeatherSlot.getWeatherSlots(response.weather)
+            weatherRepository.updateCity(city, weatherSlots)
+        }
+    }
+
+    fun getWeatherFromLocalDb(): Flow<CityWithWeatherSlots?> {
+        return weatherRepository.getWeatherFromLocalDb()
     }
 
 }

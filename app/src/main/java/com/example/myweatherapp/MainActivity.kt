@@ -11,16 +11,24 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import com.example.myweatherapp.ui.models.WeatherLocalState
 import com.example.myweatherapp.ui.models.WeatherState
 import com.example.myweatherapp.ui.theme.MyWeatherAppTheme
 import com.example.myweatherapp.viewmodels.WeatherViewModel
@@ -51,33 +59,72 @@ class MainActivity : ComponentActivity() {
             MyWeatherAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Column(Modifier.padding(innerPadding)) {
-                        val weatherState = weatherViewModel.weatherState.collectAsState()
                         Greeting(
                             name = "MyWeather App",
                             modifier = Modifier
                         )
-                        when (weatherState.value) {
-                            is WeatherState.Success -> {
-                                val cityName = (weatherState.value as WeatherState.Success).weather.city.name
-                                Text(cityName)
-                            }
+                        ApiState()
+                        LocalData()
+                        Button(onClick = {
+                            checkForPermissionToGetData()
+                        }) {
+                            Text("GetData")
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-                            is WeatherState.Error -> {
-                                Text((weatherState.value as WeatherState.Error).message)
-                            }
-                            WeatherState.Initial -> {
-                                Button(onClick = {
-                                    checkForPermissionToGetData()
-                                }) {
-                                    Text("GetData")
-                                }
-                            }
-                            WeatherState.Loading -> {
-                                Text("Loading")
+    @Composable
+    private fun ApiState() {
+        val weatherState = weatherViewModel.weatherFromApiState.collectAsState()
+        when (weatherState.value) {
+            is WeatherState.Success -> {
+                Text("Data updated successfully")
+            }
+
+            is WeatherState.Error -> {
+                Text("There was something wrong while updating data")
+            }
+            WeatherState.Initial -> {
+                Text("Click get data to update")
+            }
+            WeatherState.Loading -> {
+                Text("Updating data from api")
+            }
+        }
+    }
+
+    @Composable
+    private fun LocalData() {
+        val weatherLocalState = weatherViewModel.weatherState.collectAsState()
+        when (weatherLocalState.value) {
+            is WeatherLocalState.Success -> {
+                val city = (weatherLocalState.value as WeatherLocalState.Success).city
+
+                Text(city?.city?.name ?: "City name")
+
+                city?.weatherSlots?.let {
+                    LazyColumn {
+                        items(it) {
+                            Row {
+                                Text(it.main ?: "Weather")
+                                Spacer(modifier = Modifier.size(5.dp))
+                                Text("${it.temperature} °Celcius")
+                                Spacer(modifier = Modifier.size(5.dp))
+                                Text(it.dateText)
                             }
                         }
                     }
                 }
+            }
+
+            is WeatherLocalState.Error -> {
+                Text((weatherLocalState.value as WeatherLocalState.Error).message)
+            }
+            WeatherLocalState.Initial -> {
+                Text("Refresh data")
             }
         }
     }

@@ -4,21 +4,25 @@ import com.google.gson.annotations.SerializedName
 
 data class WeatherForecastResponse(
     @SerializedName("city")
-    val city: City,
+    val city: CityModel,
     @SerializedName("list")
     val weatherDays: List<WeatherDay>
 )
 
 data class WeatherDay(
     @SerializedName("dt")
-    val long: Long,
-    @SerializedName("temp")
+    val date: Long,
+    @SerializedName("dt_txt")
+    val dateText: String,
+    @SerializedName("main")
     val temperature: Temperature,
     @SerializedName("weather")
-    val weather: List<Weather>
+    val weather: List<WeatherModel>
 )
 
-data class Weather(
+data class WeatherModel(
+    @SerializedName("id")
+    val id: Int,
     @SerializedName("main")
     val main: String,
     @SerializedName("description")
@@ -28,13 +32,17 @@ data class Weather(
 )
 
 data class Temperature(
-    @SerializedName("min")
-    val min: Int,
-    @SerializedName("max")
-    val max: Int
+    @SerializedName("temp")
+    val temp: Double,
+    @SerializedName("temp_min")
+    val min: Double,
+    @SerializedName("temp_max")
+    val max: Double
 )
 
-data class City (
+data class CityModel (
+    @SerializedName("id")
+    val id: Int,
     @SerializedName("name")
     val name: String
 )
